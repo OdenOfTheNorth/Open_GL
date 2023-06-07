@@ -1,4 +1,11 @@
 ﻿  main.cpp
-G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\main.cpp(236,29): warning C4305: '+=': truncation from 'double' to 'float'
-G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\main.cpp(239,29): warning C4305: '-=': truncation from 'double' to 'float'
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(15,36): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(16,37): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+  Mesh.cpp
+  Shader.cpp
+  Window.cpp
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(15,36): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(16,37): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OpenGLCourseApp.vcxproj -> G:\GitHub\Open_GL_Course\OpenGLCourseApp\Debug\OpenGLCourseApp.exe
