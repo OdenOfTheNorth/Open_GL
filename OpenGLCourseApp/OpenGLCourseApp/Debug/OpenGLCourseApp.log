@@ -1,11 +1,16 @@
-﻿  main.cpp
+﻿  Window.cpp
 G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(15,36): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
 G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(16,37): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
-  Mesh.cpp
-  Shader.cpp
-  Window.cpp
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.cpp(122,28): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.cpp(123,28): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.cpp(128,31): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.cpp(130,43): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.cpp(132,24): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.cpp(133,24): warning C4244: '=': conversion from 'double' to 'GLfloat', possible loss of data
+  main.cpp
 G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(15,36): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
 G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(16,37): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\main.cpp(86,21): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
   Generating Code...
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OpenGLCourseApp.vcxproj -> G:\GitHub\Open_GL_Course\OpenGLCourseApp\Debug\OpenGLCourseApp.exe
