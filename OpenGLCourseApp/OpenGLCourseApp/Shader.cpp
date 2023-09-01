@@ -62,6 +62,26 @@ GLuint Shader::GetViewLocation()
     return uniformView;
 }
 
+GLuint Shader::GetAmbientIntensityLocation()
+{
+    return uniformAmbientIntensity;
+}
+
+GLuint Shader::GetAmbientColorLocation()
+{
+    return uniformAmbientColor;
+}
+
+GLuint Shader::GetDiffuseIntensityLocation()
+{
+    return uniformDiffuseIntensity;
+}
+
+GLuint Shader::GetDirectionLocation()
+{
+    return uniformDirection;
+}
+
 void Shader::UseShader()
 {
     glUseProgram(shaderID);
@@ -115,31 +135,35 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
     uniformModel = glGetUniformLocation(shaderID, "model");
     uniformProjection = glGetUniformLocation(shaderID, "projection");
     uniformView = glGetUniformLocation(shaderID, "view");
+    uniformAmbientColor = glGetUniformLocation(shaderID, "directionalLight.color");
+    uniformAmbientIntensity = glGetUniformLocation(shaderID, "directionalLight.ambientIntensity");
+    uniformDirection = glGetUniformLocation(shaderID, "directionalLight.direction");
+    uniformDiffuseIntensity = glGetUniformLocation(shaderID, "directionalLight.diffuseIntensity");
 }
 
 void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 {
-    GLuint theShader = glCreateShader(shaderType);
+	GLuint theShader = glCreateShader(shaderType);
 
-    const GLchar* theCode[1];
-    theCode[0] = shaderCode;
+	const GLchar* theCode[1];
+	theCode[0] = shaderCode;
 
-    GLint codeLength[1];
-    codeLength[0] = strlen(shaderCode);
+	GLint codeLength[1];
+	codeLength[0] = strlen(shaderCode);
 
-    glShaderSource(theShader, 1, theCode, codeLength);
-    glCompileShader(theShader);
+	glShaderSource(theShader, 1, theCode, codeLength);
+	glCompileShader(theShader);
 
-    GLint result = 0;
-    GLchar eLog[1024] = { 0 };
+	GLint result = 0;
+	GLchar eLog[1024] = { 0 };
 
-    glGetShaderiv(theShader, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(theShader, GL_COMPILE_STATUS, &result);
+	if (!result)
+	{
+		glGetShaderInfoLog(theShader, sizeof(eLog), NULL, eLog);
+		printf("Error compiling the %d shader: '%s'\n", shaderType, eLog);
+		return;
+	}
 
-    if (!result) {
-        glGetProgramInfoLog(theShader, sizeof(eLog), NULL, eLog);
-        printf("Error Compiling the %d shader: %s'\n", shaderType, eLog);
-        return;
-    }
-
-    glAttachShader(theProgram, theShader);
+	glAttachShader(theProgram, theShader);
 }
