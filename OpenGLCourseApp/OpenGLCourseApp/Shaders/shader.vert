@@ -7,6 +7,7 @@ layout (location = 2) in vec3 norm;
 out vec4 vCol;     
 out vec2 TexCoord;
 out vec3 Normal;
+out vec3 FragPos;
                                                              
 uniform mat4 model;                                                             
 uniform mat4 projection;  
@@ -17,5 +18,7 @@ void main(){
     vCol = vec4(clamp(pos, 0.0, 1.0), 1.0);     
 
     TexCoord = tex;             
-    Normal = mat3(transpose(inverse(model))) * norm;                   
+    Normal = mat3(transpose(inverse(model))) * norm;     
+
+    FragPos = (model * vec4(pos, 1.0)).xyz;
 }                                                                               

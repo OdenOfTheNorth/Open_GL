@@ -44,11 +44,11 @@ void Camera::keyControl(bool* keys, GLfloat dealtaTime)
 		position += right * velocity;
 	}
 
-	if (keys[GLFW_KEY_SPACE]) {
+	if (keys[GLFW_KEY_SPACE] || keys[GLFW_KEY_E]) {
 		position += worldUp * velocity;
 	}
 
-	if (keys[GLFW_KEY_LEFT_CONTROL]) {
+	if (keys[GLFW_KEY_LEFT_CONTROL] || keys[GLFW_KEY_Q]) {
 		position -= worldUp * velocity;
 	}
 }
@@ -64,6 +64,11 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 	pitch = fmax(-89.0f, fmin(pitch, 89.0f)); //Clamp 
 
 	Update();
+}
+
+glm::vec3 Camera::getCameraPosition()
+{
+	return position;
 }
 
 glm::mat4 Camera::calculateViewMatrix()
