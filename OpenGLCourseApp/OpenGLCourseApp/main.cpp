@@ -22,6 +22,7 @@
 #include "Texture.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "SpotLight.h"
 #include "Material.h"
 
 const float toRadians = 3.14159265f / 180.f;
@@ -40,6 +41,7 @@ Material dullMaterial;
 
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -129,11 +131,11 @@ void CreateObject()
     };
 
     GLfloat floorVertices[] = {
-        //   x      y       z         u     v         nX   nY   nZ
-            -10.f,  -0.f,  -10.0f,    0.0f, 0.0f,     0.f, -1.f, 0.f,
-             10.f,  -0.f,  -10.0f,    10.f, 0.0f,     0.f, -1.f, 0.f,
-            -10.f,  -0.f,   10.6f,    1.0f, 10.0f,    0.f, -1.f, 0.f,
-             10.0f,  0.f,   10.0f,    10.0f, 10.0f,   0.f, -1.f, 0.f
+        //   x        y      z          u        v         nX   nY   nZ
+            -100.f,  -0.f,  -100.0f,    0.0f,    0.0f,     0.f, -1.f, 0.f,
+             100.f,  -0.f,  -100.0f,    100.f,   0.0f,     0.f, -1.f, 0.f,
+            -100.f,  -0.f,   100.6f,    1.0f,    100.0f,    0.f, -1.f, 0.f,
+             100.0f,  0.f,   100.0f,    100.0f,  100.0f,    0.f, -1.f, 0.f
     };
 
     CalcAvarageNormals(indices, 12, vertices, 32, 8, 5);
@@ -179,31 +181,47 @@ int main()
     dullMaterial = Material(0.3f, 4);
 
     mainLight = DirectionalLight(   1.0f, 1.0f, 1.0f, 
-                                    0.0f, 0.0f,
+                                    0.1f, 0.0f,
                                     0.0f, 0.0f, -1.0f);
 
     unsigned int pointLightCount = 0;
+    unsigned int spotLightCount = 0;
 
     pointLights[0] = PointLight(    0.0f, 0.0f, 1.0f,
                                     0.1f, 1.0f,
                                     4.0f, 2.0f, 0.0f,
                                     0.3f, 0.1f, 0.1f);
 
-    pointLightCount++;
+    //pointLightCount++;
     
     pointLights[1] = PointLight(    0.0f, 1.0f, 0.0f,
                                     0.1f, 1.0f,
                                     -4.0f, 2.0f, 0.0f,
                                     0.3f, 0.1f, 0.1f);
 
-    pointLightCount++;
+    //pointLightCount++;
 
     pointLights[2] = PointLight(    1.0f, 0.0f, 0.0f,
                                     0.1f, 1.0f,
                                     0.0f, 2.0f, 4.0f,
                                     0.3f, 0.1f, 0.1f);
+    //pointLightCount++;
 
-    pointLightCount++;
+    spotLights[0] = SpotLight(  1.0f, 1.0f, 1.0f,
+                                0.0f, 1.0f,
+                                0.0f, 0.0f, 0.0f,
+                                0.0f,-1.0f, 0.0f,
+                                1.0f, 0.0f, 0.0f,
+                                20.f);
+    spotLightCount++;    
+
+    spotLights[1] = SpotLight(  1.0f, 1.0f, 1.0f,
+                                0.0f, 1.0f,
+                                0.0f, 1.5f, 4.0f,
+                                -100.0f, -1.0f, 0.0f,
+                                1.0f, 0.0f, 0.0f,
+                                20.f);
+    spotLightCount++;
 
     GLfloat aspectRation = mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight();
     glm::mat4 projection = glm::perspective(45.f, aspectRation, 0.1f, 100.f);
@@ -225,7 +243,7 @@ int main()
         glfwPollEvents();
 
         camera.keyControl(mainWindow.getKeys(), deltaTime);
-        camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+        camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());       
 
         // clear the window
         glClearColor(0.f, 0.0f, 0.0f, 1.0f);
@@ -239,8 +257,11 @@ int main()
         uniformSpecularIntensity = shaderList[0]->getSpecularIntensityLocation();
         uniformShinines = shaderList[0]->getShininessLocation();
 
+        spotLights[0].SetFlash(camera.getCameraPosition(), camera.getCameraDirection());
+
         shaderList[0]->SetDirectionalLight(&mainLight);
         shaderList[0]->SetPointLights(pointLights, pointLightCount);
+        shaderList[0]->SetSpotLights(spotLights, spotLightCount);
 
         glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
@@ -271,7 +292,7 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
         //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-        quadTexture.UseTexture();
+        dirtTexture.UseTexture();
         shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
         meshList[2]->RenderMesh();
 
