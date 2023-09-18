@@ -25,6 +25,8 @@
 #include "SpotLight.h"
 #include "Material.h"
 
+//#include "Model.h"
+
 const float toRadians = 3.14159265f / 180.f;
 
 Window mainWindow;
@@ -38,6 +40,8 @@ Texture quadTexture;
 
 Material shinyMaterial;
 Material dullMaterial;
+
+//Model fighter;
 
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
@@ -55,6 +59,8 @@ static const char* vShader = "Shaders/shader.vert";
 //fragment shader
 static const char* fShader = "Shaders/shader.frag";
 
+const int gridX = 10;
+const int gridY = 10;
 
 void CalcAvarageNormals(unsigned int * indices,     unsigned int indiceCount,  GLfloat* vertices, 
                         unsigned int verticeCount,  unsigned int vLength,       unsigned int normalOffset)
@@ -140,17 +146,17 @@ void CreateObject()
 
     CalcAvarageNormals(indices, 12, vertices, 32, 8, 5);
 
-    Mesh* obj1 = new Mesh();
-    obj1->CreateMesh(vertices, indices, 32, 12);
-    meshList.push_back(obj1);
+    const int grid = gridX * gridY;
 
-    Mesh* obj2 = new Mesh();
-    obj2->CreateMesh(vertices, indices, 32, 12);
-    meshList.push_back(obj2);
+    for (size_t i = 0; i < grid; i++) {
+        Mesh* obj = new Mesh();
+        obj->CreateMesh(vertices, indices, 32, 12);
+        meshList.push_back(obj);
+    }
 
-    Mesh* obj3 = new Mesh();
-    obj3->CreateMesh(floorVertices, floorIndices, 32, 6);
-    meshList.push_back(obj3);
+    Mesh* plane = new Mesh();
+    plane->CreateMesh(floorVertices, floorIndices, 32, 6);
+    meshList.push_back(plane);
 }
 
 void CreateShaders() {
@@ -161,7 +167,7 @@ void CreateShaders() {
 
 int main()
 {
-    mainWindow = Window(1366, 768);
+    mainWindow = Window(1920, 1080);
     mainWindow.Initialise();
 
     CreateObject();
@@ -180,32 +186,46 @@ int main()
     shinyMaterial = Material(4.0f, 256);
     dullMaterial = Material(0.3f, 4);
 
+    //fighter = Model();
+    //fighter.LoadModel("Models/NewTieFighter.obj");
+
+
     mainLight = DirectionalLight(   1.0f, 1.0f, 1.0f, 
                                     0.1f, 0.0f,
                                     0.0f, 0.0f, -1.0f);
 
     unsigned int pointLightCount = 0;
     unsigned int spotLightCount = 0;
+    const int space = 3;
+    float time = 0.f;
+    
+    glm::vec3 lightPos1 = glm::vec3((float)(gridX * space), 2.0f, (float)(gridY * space));
+    glm::vec3 lightPos2 = glm::vec3(0.0f, 2.0f, (float)(gridY * space));
+    glm::vec3 lightPos3 = glm::vec3(0.0f, 2.0f, 0.0f);
+
+    printf("%f, %f, %f\n", lightPos1.x, lightPos1.y, lightPos1.z);
+    printf("%f, %f, %f\n", lightPos2.x, lightPos2.y, lightPos2.z);
+    printf("%f, %f, %f\n", lightPos3.x, lightPos3.y, lightPos3.z);
 
     pointLights[0] = PointLight(    0.0f, 0.0f, 1.0f,
                                     0.1f, 1.0f,
-                                    4.0f, 2.0f, 0.0f,
+                                    lightPos1.x, lightPos1.y, lightPos1.z,
                                     0.3f, 0.1f, 0.1f);
 
-    //pointLightCount++;
+    pointLightCount++;
     
     pointLights[1] = PointLight(    0.0f, 1.0f, 0.0f,
                                     0.1f, 1.0f,
-                                    -4.0f, 2.0f, 0.0f,
+                                    lightPos2.x, lightPos2.y, lightPos2.z,
                                     0.3f, 0.1f, 0.1f);
 
-    //pointLightCount++;
+    pointLightCount++;
 
     pointLights[2] = PointLight(    1.0f, 0.0f, 0.0f,
                                     0.1f, 1.0f,
-                                    0.0f, 2.0f, 4.0f,
+                                    lightPos3.x, lightPos3.y, lightPos3.z,
                                     0.3f, 0.1f, 0.1f);
-    //pointLightCount++;
+    pointLightCount++;
 
     spotLights[0] = SpotLight(  1.0f, 1.0f, 1.0f,
                                 0.0f, 1.0f,
@@ -229,8 +249,6 @@ int main()
     GLuint  uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0, 
             uniformShinines = 0, uniformSpecularIntensity = 0;
 
-    float time = 0.f;
-
     // Loop until winows closed
     while (!mainWindow.getShouldClose())
     {
@@ -238,6 +256,8 @@ int main()
         GLfloat now = glfwGetTime(); // SDL_GetPerfomaceCounter();
         deltaTime = now - lastTime; // (now - lastTime) * 1000 / SDL_GetPerfaomceFrequency(); multiplay by 1000 because we get miliseconds instead of seconds.
         lastTime = now;
+
+        time += deltaTime;
 
         // Get + Handle user input events
         glfwPollEvents();
@@ -259,6 +279,16 @@ int main()
 
         spotLights[0].SetFlash(camera.getCameraPosition(), camera.getCameraDirection());
 
+        float xPos = sin(time);
+        float zPos = cos(time);
+
+        glm::vec3 cirecPos = glm::vec3(xPos , 0, zPos);
+        cirecPos *= 10;
+        glm::vec3 Offset = glm::vec3(gridX * space / 2, 3, gridY * space / 2);
+        glm::vec3 down = glm::vec3(0.f, -1.f, 0.f);
+
+        spotLights[1].SetFlash(Offset + cirecPos, down);
+
         shaderList[0]->SetDirectionalLight(&mainLight);
         shaderList[0]->SetPointLights(pointLights, pointLightCount);
         shaderList[0]->SetSpotLights(spotLights, spotLightCount);
@@ -273,28 +303,34 @@ int main()
 
         glm::mat4 model(1.0f);
 
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
-        //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-        brickTexture.UseTexture();
-        shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-        meshList[0]->RenderMesh();
+        
 
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 4.0f, -2.5f));
-        //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-        dirtTexture.UseTexture();
-        dullMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-        meshList[1]->RenderMesh();
+        for (size_t x = 0; x < gridX; x++) {
+            for (size_t y = 0; y < gridY; y++) {
+                const int index = (x * gridX) + y;
+                model = glm::translate(model, glm::vec3(x * space, 0.0f, y * space));
+                //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+                brickTexture.UseTexture();
+                shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
+                meshList[index]->RenderMesh();
+                model = glm::mat4(1.0f);
+            }
+        }
+
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        //glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        //shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
+        //fighter.RenderModel();
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         dirtTexture.UseTexture();
         shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-        meshList[2]->RenderMesh();
+        meshList[gridX * gridY]->RenderMesh();
 
         glUseProgram(0);
 
