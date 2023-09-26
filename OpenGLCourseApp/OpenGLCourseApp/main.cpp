@@ -41,7 +41,7 @@ Texture quadTexture;
 Material shinyMaterial;
 Material dullMaterial;
 
-Model fighter;
+std::vector<Model*> fighters;
 
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
@@ -159,6 +159,17 @@ void CreateObject()
     meshList.push_back(plane);
 }
 
+void CreateFighters() {
+    
+    const int grid = gridX * gridY;
+
+    for (size_t i = 0; i < grid; i++) {
+        Model* fighter = new Model();
+        fighter->LoadModel("Models/NewTieFighter.obj");
+        fighters.push_back(fighter);
+    }   
+}
+
 void CreateShaders() {
     Shader* shader1 = new Shader();
     shader1->CreateFromFiles(vShader, fShader);
@@ -171,7 +182,9 @@ int main()
     mainWindow.Initialise();
 
     CreateObject();
+    CreateFighters();
     CreateShaders();
+
     camera = Camera(glm::vec3(0.f, 0.f, 2.f), glm::vec3(0.f, 1.f, 0.f), -90.f, 0.f, moveSpeed, turnSpeed);
 
     brickTexture = Texture("Textures/brick.png");
@@ -185,10 +198,6 @@ int main()
 
     shinyMaterial = Material(4.0f, 256);
     dullMaterial = Material(0.3f, 4);
-
-    fighter = Model();
-    fighter.LoadModel("Models/NewTieFighter.obj");
-
 
     mainLight = DirectionalLight(   1.0f, 1.0f, 1.0f, 
                                     0.1f, 0.0f,
@@ -303,27 +312,32 @@ int main()
 
         glm::mat4 model(1.0f);
                
+        //for (size_t x = 0; x < gridX; x++) {
+        //    for (size_t y = 0; y < gridY; y++) {
+        //        const int index = (x * gridX) + y;
+        //        model = glm::translate(model, glm::vec3(x * space, 0.0f, y * space));
+        //        //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+        //        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        //        brickTexture.UseTexture();
+        //        shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
+        //        meshList[index]->RenderMesh();
+        //        model = glm::mat4(1.0f);
+        //    }
+        //}
+
         for (size_t x = 0; x < gridX; x++) {
             for (size_t y = 0; y < gridY; y++) {
                 const int index = (x * gridX) + y;
-                model = glm::translate(model, glm::vec3(x * space, 0.0f, y * space));
-                //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x * space, 1 + (sin(time + x)), y * space));
+                model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
                 glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
                 brickTexture.UseTexture();
                 shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-                meshList[index]->RenderMesh();
-                model = glm::mat4(1.0f);
+                fighters[index]->RenderModel();
             }
-        }
-
-        model = glm::mat4(1.0f);
-        glm::vec3 fighterPos = Offset + cirecPos + glm::vec3(0.0f, 1 + (sin(time)), 0.0f);
-        model = glm::translate(model, fighterPos);
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-        shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-        fighter.RenderModel();
-
+        }   
+        
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
