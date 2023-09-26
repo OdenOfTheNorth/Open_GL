@@ -14,6 +14,10 @@ public:
                     GLuint diffuseIntensityLocation, GLuint positionLocation,
                     GLuint constantLocation, GLuint linearLocation, GLuint exponentLocation);
 
+    void SetPosition(glm::vec3 pos);
+
+    void SetColor(GLfloat red, GLfloat green, GLfloat blue);
+
     ~PointLight();
 
 protected:

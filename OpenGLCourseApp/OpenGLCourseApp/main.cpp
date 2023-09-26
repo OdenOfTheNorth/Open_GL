@@ -25,7 +25,7 @@
 #include "SpotLight.h"
 #include "Material.h"
 
-//#include "Model.h"
+#include "Model.h"
 
 const float toRadians = 3.14159265f / 180.f;
 
@@ -41,7 +41,7 @@ Texture quadTexture;
 Material shinyMaterial;
 Material dullMaterial;
 
-//Model fighter;
+Model fighter;
 
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
@@ -175,19 +175,19 @@ int main()
     camera = Camera(glm::vec3(0.f, 0.f, 2.f), glm::vec3(0.f, 1.f, 0.f), -90.f, 0.f, moveSpeed, turnSpeed);
 
     brickTexture = Texture("Textures/brick.png");
-    brickTexture.LoadTexture();
+    brickTexture.LoadTextureA();
 
     dirtTexture = Texture("Textures/dirt.png");
-    dirtTexture.LoadTexture();
+    dirtTexture.LoadTextureA();
 
     quadTexture = Texture("Textures/plain.png");
-    quadTexture.LoadTexture();
+    quadTexture.LoadTextureA();
 
     shinyMaterial = Material(4.0f, 256);
     dullMaterial = Material(0.3f, 4);
 
-    //fighter = Model();
-    //fighter.LoadModel("Models/NewTieFighter.obj");
+    fighter = Model();
+    fighter.LoadModel("Models/NewTieFighter.obj");
 
 
     mainLight = DirectionalLight(   1.0f, 1.0f, 1.0f, 
@@ -302,9 +302,7 @@ int main()
         );
 
         glm::mat4 model(1.0f);
-
-        
-
+               
         for (size_t x = 0; x < gridX; x++) {
             for (size_t y = 0; y < gridY; y++) {
                 const int index = (x * gridX) + y;
@@ -318,12 +316,13 @@ int main()
             }
         }
 
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        //glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-        //shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-        //fighter.RenderModel();
+        model = glm::mat4(1.0f);
+        glm::vec3 fighterPos = Offset + cirecPos + glm::vec3(0.0f, 1 + (sin(time)), 0.0f);
+        model = glm::translate(model, fighterPos);
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        shinyMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
+        fighter.RenderModel();
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
