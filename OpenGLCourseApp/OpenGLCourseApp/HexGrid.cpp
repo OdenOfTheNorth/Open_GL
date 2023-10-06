@@ -37,6 +37,7 @@ std::vector<glm::vec3> HexGrid::CreateHexGrid()
 
 glm::vec3 HexGrid::GetWorldPosFromCoords(int q, int r, int s)
 {
+
 	return glm::vec3();
 }
 

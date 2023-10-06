@@ -83,6 +83,7 @@ void Model::LoadMesh(aiMesh* mesh, const aiScene* scene)
 		}
 		else {
 			vertices.insert(vertices.end(), { 0.f, 0.f });
+			printf("No Texture Coords\n");
 		}
 		vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y , mesh->mNormals[i].z });
 	}
