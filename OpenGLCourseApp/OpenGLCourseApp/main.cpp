@@ -30,7 +30,7 @@
 const float toRadians = 3.14159265f / 180.f;
 
 GLuint  uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
-uniformShinines = 0, uniformSpecularIntensity = 0, uniformOmniLightPos = 0, uniformFarPlane = 0;
+uniformShininess = 0, uniformSpecularIntensity = 0, uniformOmniLightPos = 0, uniformFarPlane = 0;
 
 Window mainWindow;
 
@@ -181,7 +181,7 @@ void CreateFighters() {
   
     for (size_t i = 0; i < fightersCount; i++) {
         Model* fighter = new Model();
-        fighter->LoadModel("Models/QuarrenCoyoteShip.obj");
+        fighter->LoadModel("Models/NewTieFighter.obj");
         fighters.push_back(fighter);
     }   
 }
@@ -200,27 +200,14 @@ void RenderScene()
 {
     glm::mat4 model(1.0f);
 
-    //for (size_t x = 0; x < gridX; x++) {
-    //    for (size_t y = 0; y < gridY; y++) {
-    //        const int index = (x * gridX) + y;
-    //        model = glm::mat4(1.0f);
-    //        model = glm::translate(model, glm::vec3(x * space, 1.0, y * space));
-    //        model = glm::scale(model, glm::vec3(0.002f, 0.002f, 0.002f));
-    //        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-    //        brickTexture.UseTexture();
-    //        dullMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
-    //        fighters[index]->RenderModel();
-    //    }
-    //}
-
     const float angle = 360 / fightersCount;
 
     for (size_t i = 0; i < fightersCount; i++) {
         
         model = glm::mat4(1.0f);
-        model = glm::rotate(model, (angle * i * toRadians),glm::vec3(-0.0, 1.0, 0));
+        model = glm::rotate(model, currentTime + (angle * i * toRadians),glm::vec3(-0.0, 1.0, 0));
         model = glm::translate(model, glm::vec3(-10.0, cos(currentTime + i), 0));
-        model = glm::scale(model, glm::vec3(0.002f, 0.002f, 0.002f));
+        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         //fighterTexture.UseTexture();
         //dullMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
@@ -231,46 +218,54 @@ void RenderScene()
     model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     dirtTexture.UseTexture();
-    dullMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
+    dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
     meshList[gridX * gridY]->RenderMesh();
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -10.0f));
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    brickTexture.UseTexture();
+    dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+    meshList[0]->RenderMesh();
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
 {
-    directionalShadowShader.UseShader();
+	directionalShadowShader.UseShader();
 
-    glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowWidth());
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
-    light->GetShadowMap()->Write();
-    glClear(GL_DEPTH_BUFFER_BIT);
+	light->GetShadowMap()->Write();
+	glClear(GL_DEPTH_BUFFER_BIT);
 
-    uniformModel = directionalShadowShader.GetModelLocation();
-    glm::mat4 lightTransform = light->CalculateLightTransform();
-    directionalShadowShader.setDirectionalLightTransform(&lightTransform);
+	uniformModel = directionalShadowShader.GetModelLocation();
+    glm::mat4 lTransform = light->CalculateLightTransform();
+	directionalShadowShader.SetDirectionalLightTransform(&lTransform);
 
-    RenderScene();
+	directionalShadowShader.Validate();
+	RenderScene();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void OmniShadowMapPass(PointLight* light) 
 {
+    glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+
     omniShadowShader.UseShader();
-
-    glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowWidth());
-
-    light->GetShadowMap()->Write();
-    glClear(GL_DEPTH_BUFFER_BIT);
-
     uniformModel = omniShadowShader.GetModelLocation();
-
     uniformOmniLightPos = omniShadowShader.GetOmniLightPosLocation();
     uniformFarPlane = omniShadowShader.GetFarPlaneLocation();
 
+    light->GetShadowMap()->Write();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
     glUniform3f(uniformOmniLightPos, light->GetPosition().x, light->GetPosition().y, light->GetPosition().z);
     glUniform1f(uniformFarPlane, light->GetFarPlane());
-    omniShadowShader.SetLightmatrices(light->CalculateLightTransform());
+    omniShadowShader.SetOmniLightMatrices(light->CalculateLightTransform());
 
+    omniShadowShader.Validate();
     RenderScene();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -280,52 +275,43 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
     shaderList[0]->UseShader();
 
-    shaderList[0]->UseShader();
     uniformModel = shaderList[0]->GetModelLocation();
     uniformProjection = shaderList[0]->GetProjectionLocation();
     uniformView = shaderList[0]->GetViewLocation();
-    uniformEyePosition = shaderList[0]->getEyePositionLocation();
-    uniformSpecularIntensity = shaderList[0]->getSpecularIntensityLocation();
-    uniformShinines = shaderList[0]->getShininessLocation();
+    uniformEyePosition = shaderList[0]->GetEyePositionLocation();
+    uniformSpecularIntensity = shaderList[0]->GetSpecularIntensityLocation();
+    uniformShininess = shaderList[0]->GetShininessLocation();
 
-    glViewport(0,0, 1920, 1080);
+    glViewport(0, 0, 1920, 1080);
 
-    // clear the window
-    glClearColor(0.f, 0.0f, 0.0f, 1.0f);
+    // Clear the window
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glUniform3f(uniformEyePosition,
-        camera.getCameraPosition().x,
-        camera.getCameraPosition().y,
-        camera.getCameraPosition().z
-    );
+    glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
     shaderList[0]->SetDirectionalLight(&mainLight);
-    shaderList[0]->SetPointLights(pointLights, pointLightCount);
-    shaderList[0]->SetSpotLights(spotLights, spotLightCount);
-    glm::mat4 lightTransform = mainLight.CalculateLightTransform();
-    shaderList[0]->setDirectionalLightTransform(&lightTransform);
+    shaderList[0]->SetPointLights(pointLights, pointLightCount, 3, 0);
+    shaderList[0]->SetSpotLights(spotLights, spotLightCount, 3 + pointLightCount, pointLightCount);
+    glm::mat4 lTransform = mainLight.CalculateLightTransform();
+    shaderList[0]->SetDirectionalLightTransform(&lTransform);
 
-    mainLight.GetShadowMap()->Read(GL_TEXTURE1);
-    shaderList[0]->SetTexture(0);
-    shaderList[0]->SetDirectionalShadowMap(1);
+    mainLight.GetShadowMap()->Read(GL_TEXTURE2);
 
-    spotLights[0].SetFlash(camera.getCameraPosition(), camera.getCameraDirection());
 
-    //float xPos = sin(time);
-    //float zPos = cos(time);
+    shaderList[0]->SetTexture(1);
+    shaderList[0]->SetDirectionalShadowMap(2);
 
-    //glm::vec3 cirecPos = glm::vec3(xPos, 0, zPos);
-    //cirecPos *= 10;
-    //glm::vec3 Offset = glm::vec3(gridX * space / 2, 3, gridY * space / 2);
-    //glm::vec3 down = glm::vec3(0.f, -1.f, 0.f);
+    glm::vec3 lowerLight = camera.getCameraPosition();
+    lowerLight.y -= 0.3f;
+    spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
-    //spotLights[1].SetFlash(Offset + cirecPos, down);
-
+    shaderList[0]->Validate();
     RenderScene();
 }
+
 
 int main()
 {
@@ -358,18 +344,22 @@ int main()
                                     0.1f, 0.1f,
                                     0.0f, -15.0f, -10.0f);
 
+    std::vector<glm::vec3> positions;
 
 
-    
-    glm::vec3 lightPos1 = glm::vec3((float)(gridX * space), 2.0f, (float)(gridY * space));
-    glm::vec3 lightPos2 = glm::vec3(0.0f, 2.0f, (float)(gridY * space));
-    glm::vec3 lightPos3 = glm::vec3(0.0f, 2.0f, 0.0f);
+    for(size_t i = 0; i <= 3; i++)
+    {
+        float angle = 360 / 3;
+        float xPos = sin(i * angle);
+        float zPos = cos(i * angle);
+        positions.push_back(glm::vec3(xPos * 5, 3, zPos * 5));
+    }
 
     pointLights[0] = PointLight(    1024, 1024,
                                     0.01f, 100.0f,
                                     0.0f, 0.0f, 1.0f,
                                     0.1f, 1.0f,
-                                    lightPos1.x, lightPos1.y, lightPos1.z,
+                                    positions[0].x, positions[0].y, positions[0].z,
                                     0.3f, 0.1f, 0.1f);
 
     pointLightCount++;
@@ -378,7 +368,7 @@ int main()
                                     0.01f, 100.0f,
                                     0.0f, 1.0f, 0.0f,
                                     0.1f, 1.0f,
-                                    lightPos2.x, lightPos2.y, lightPos2.z,
+                                    positions[1].x, positions[1].y, positions[1].z,
                                     0.3f, 0.1f, 0.1f);
 
     pointLightCount++;
@@ -387,7 +377,7 @@ int main()
                                     0.01f, 100.0f,
                                     1.0f, 0.0f, 0.0f,
                                     0.1f, 1.0f,
-                                    lightPos3.x, lightPos3.y, lightPos3.z,
+                                    positions[2].x, positions[2].y, positions[2].z,
                                     0.3f, 0.1f, 0.1f);
     pointLightCount++;
 
@@ -405,15 +395,14 @@ int main()
                                 0.01f, 100.0f,
                                 1.0f, 1.0f, 1.0f,
                                 0.0f, 1.0f,
-                                0.0f, 1.5f, 4.0f,
-                                -100.0f, -1.0f, 0.0f,
+                                -0.0f, 0.0f, 0.0f,
+                                -1.0f, -1.0f, 0.0f,
                                 1.0f, 0.0f, 0.0f,
                                 20.f);
     spotLightCount++;
 
     GLfloat aspectRation = mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight();
     glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRation, 0.1f, 100.f);
-
 
     // Loop until winows closed
     while (!mainWindow.getShouldClose())
@@ -429,7 +418,9 @@ int main()
         glfwPollEvents();
 
         camera.keyControl(mainWindow.getKeys(), deltaTime);
-        camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());       
+        camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());     
+
+        //camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), 6, currentTime);
 
         DirectionalShadowMapPass(&mainLight);
         

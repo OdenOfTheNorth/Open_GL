@@ -6,6 +6,11 @@ Model::Model()
 
 void Model::LoadModel(const std::string& fileName)
 {
+	if (fileName == "") {
+		printf("No File name provided");
+		return;
+	}
+
 	Assimp::Importer impoter;
 	const unsigned int aiProcceses = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices;
 	const aiScene* scene = impoter.ReadFile(fileName, aiProcceses);
@@ -79,13 +84,14 @@ void Model::LoadMesh(aiMesh* mesh, const aiScene* scene)
 		vertices.insert(vertices.end(), { mesh->mVertices[i].x, mesh->mVertices[i].y , mesh->mVertices[i].z });
 		if (mesh->mTextureCoords[0])
 		{
-			vertices.insert(vertices.end(), { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y });
+			vertices.insert(vertices.end(), { -mesh->mTextureCoords[0][i].x, -mesh->mTextureCoords[0][i].y });
 		}
 		else {
 			vertices.insert(vertices.end(), { 0.f, 0.f });
 			printf("No Texture Coords\n");
 		}
-		vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y , mesh->mNormals[i].z });
+		//inver the normals to make lighting work correcly
+		vertices.insert(vertices.end(), { -mesh->mNormals[i].x, -mesh->mNormals[i].y , -mesh->mNormals[i].z });
 	}
 
 	for (size_t i = 0; i < mesh->mNumFaces; i++)

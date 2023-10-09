@@ -25,6 +25,8 @@ public:
 	void CreateFromFiles(const char* vertexLocation, const char* fragmentLocation);
 	void CreateFromFiles(const char* vertexLocation, const char* geometryLocation, const char* fragmentLocation);
 
+	void Validate();
+
 	std::string ReadFile(const char* fileLocation);
 
 	GLuint GetProjectionLocation();
@@ -34,19 +36,21 @@ public:
 	GLuint GetAmbientColorLocation();
 	GLuint GetDiffuseIntensityLocation();
 	GLuint GetDirectionLocation();
-	GLuint getSpecularIntensityLocation();
-	GLuint getShininessLocation();
-	GLuint getEyePositionLocation();
+	GLuint GetSpecularIntensityLocation();
+	GLuint GetShininessLocation();
+	GLuint GetEyePositionLocation();
 	GLuint GetOmniLightPosLocation();
 	GLuint GetFarPlaneLocation();
 
 	void SetDirectionalLight(DirectionalLight* dLight);
-	void SetPointLights(PointLight* pLight, unsigned int lightCount);
-	void SetSpotLights(SpotLight* sLight, unsigned int lightCount);
+	void SetPointLights(PointLight* pLight, unsigned int lightCount, unsigned int textureUnit, unsigned int offset);
+	void SetSpotLights(SpotLight* sLight, unsigned int lightCount, unsigned int textureUnit, unsigned int offset);
 	void SetTexture(GLuint textureUnit);
 	void SetDirectionalShadowMap(GLuint textureUnit);
-	void setDirectionalLightTransform(glm::mat4* ltransform);
+	void SetDirectionalLightTransform(glm::mat4* ltransform);
 	void SetLightmatrices(std::vector<glm::mat4> lightMatrices);
+
+	void SetOmniLightMatrices(std::vector<glm::mat4> lightMatrices);
 
 	void UseShader();
 	void ClearShader();
@@ -100,6 +104,11 @@ private:
 		GLuint uniformDirection;
 		GLuint uniformEdge;
 	} uniformSpotLight[MAX_SPOT_LIGHTS];
+
+	struct {
+		GLuint shadowMap;
+		GLuint farPlane;
+	} uniformOmniShadowMap[MAX_SPOT_LIGHTS + MAX_POINT_LIGHTS];
 
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void CompileShader(const char* vertexCode, const char* geomatryCode, const char* fragmentCode);

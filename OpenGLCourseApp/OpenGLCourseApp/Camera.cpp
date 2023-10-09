@@ -66,6 +66,20 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 	Update();
 }
 
+void Camera::RotateAroundPoint(glm::vec3 origin, float dist, float cTime)
+{
+	float x = sin(cTime);
+	float z = cos(cTime);
+
+	glm::vec3 pos = glm::vec3(x * dist, origin.y, z * dist);
+
+	position = pos;
+	front = origin - position;
+
+	right = glm::normalize(glm::cross(front, worldUp));
+	up = glm::normalize(glm::cross(right, front));
+}
+
 glm::vec3 Camera::getCameraPosition()
 {
 	return position;
