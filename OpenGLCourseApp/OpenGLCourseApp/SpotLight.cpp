@@ -30,7 +30,8 @@ void SpotLight::UseLight(	GLuint ambientIntensityLocation, GLuint ambientColorLo
 {
 	glUniform3f(ambientColorLocation, color.x, color.y, color.z);
 
-	if (isOn) {
+	if (isOn) 
+	{
 		glUniform1f(ambientIntensityLocation, ambientIntensity);
 		glUniform1f(diffuseIntensityLocation, diffuseIntensity);
 	}
@@ -38,7 +39,6 @@ void SpotLight::UseLight(	GLuint ambientIntensityLocation, GLuint ambientColorLo
 		glUniform1f(ambientIntensityLocation, 0.0f);
 		glUniform1f(diffuseIntensityLocation, 0.0f);
 	}
-
 
 	glUniform3f(positionLocation, position.x, position.y, position.z);
 	glUniform1f(constantLocation, constant);

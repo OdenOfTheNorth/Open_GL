@@ -36,7 +36,7 @@ Window mainWindow;
 
 std::vector<Mesh*> meshList;
 
-std::vector<Shader*> shaderList;
+std::vector<Shader> shaderList;
 Shader directionalShadowShader;
 Shader omniShadowShader;
 
@@ -45,7 +45,6 @@ Camera camera;
 Texture brickTexture;
 Texture dirtTexture;
 Texture quadTexture;
-Texture fighterTexture;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -181,7 +180,7 @@ void CreateFighters() {
   
     for (size_t i = 0; i < fightersCount; i++) {
         Model* fighter = new Model();
-        fighter->LoadModel("Models/NewTieFighter.obj");
+        fighter->LoadModel("Models/uh60.obj");
         fighters.push_back(fighter);
     }   
 }
@@ -189,11 +188,13 @@ void CreateFighters() {
 void CreateShaders() {
     Shader* shader1 = new Shader();
     shader1->CreateFromFiles(vShader, fShader);
-    shaderList.push_back(shader1);
+    shaderList.push_back(*shader1);
 
     directionalShadowShader = Shader();
     directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
-    omniShadowShader.CreateFromFiles("Shaders/omni_shadow_map.vert", "Shaders/omni_shadow_map.geom", "Shaders/omni_shadow_map.frag");
+
+    omniShadowShader = Shader();
+    omniShadowShader.CreateFromFiles("Shaders/omni_directional_shadow_map.vert", "Shaders/omni_directional_shadow_map.geom", "Shaders/omni_directional_shadow_map.frag");
 }
 
 void RenderScene()
@@ -204,12 +205,15 @@ void RenderScene()
 
     for (size_t i = 0; i < fightersCount; i++) {
         
+        //currentTime +
+        //cos(currentTime + i)
         model = glm::mat4(1.0f);
-        model = glm::rotate(model, currentTime + (angle * i * toRadians),glm::vec3(-0.0, 1.0, 0));
+        model = glm::rotate(model, currentTime + (angle * i * toRadians),glm::vec3(0.0, -1.0, 0));
+        //model = glm::translate(model, glm::vec3(0, 2, 0));
         model = glm::translate(model, glm::vec3(-10.0, cos(currentTime + i), 0));
+        model = glm::rotate(model, -90.0f * toRadians, glm::vec3(1.0, 0.0, 0.0));
         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-        //fighterTexture.UseTexture();
         //dullMaterial.useMaterial(uniformSpecularIntensity, uniformShinines);
         fighters[i]->RenderModel();
     }
@@ -273,14 +277,14 @@ void OmniShadowMapPass(PointLight* light)
 
 void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
-    shaderList[0]->UseShader();
+    shaderList[0].UseShader();
 
-    uniformModel = shaderList[0]->GetModelLocation();
-    uniformProjection = shaderList[0]->GetProjectionLocation();
-    uniformView = shaderList[0]->GetViewLocation();
-    uniformEyePosition = shaderList[0]->GetEyePositionLocation();
-    uniformSpecularIntensity = shaderList[0]->GetSpecularIntensityLocation();
-    uniformShininess = shaderList[0]->GetShininessLocation();
+    uniformModel = shaderList[0].GetModelLocation();
+    uniformProjection = shaderList[0].GetProjectionLocation();
+    uniformView = shaderList[0].GetViewLocation();
+    uniformEyePosition = shaderList[0].GetEyePositionLocation();
+    uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
+    uniformShininess = shaderList[0].GetShininessLocation();
 
     glViewport(0, 0, 1920, 1080);
 
@@ -292,23 +296,23 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
     glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-    shaderList[0]->SetDirectionalLight(&mainLight);
-    shaderList[0]->SetPointLights(pointLights, pointLightCount, 3, 0);
-    shaderList[0]->SetSpotLights(spotLights, spotLightCount, 3 + pointLightCount, pointLightCount);
+    shaderList[0].SetDirectionalLight(&mainLight);
+    shaderList[0].SetPointLights(pointLights, pointLightCount, 3, 0);
+    shaderList[0].SetSpotLights(spotLights, spotLightCount, 3 + pointLightCount, pointLightCount);
     glm::mat4 lTransform = mainLight.CalculateLightTransform();
-    shaderList[0]->SetDirectionalLightTransform(&lTransform);
+    shaderList[0].SetDirectionalLightTransform(&lTransform);
 
     mainLight.GetShadowMap()->Read(GL_TEXTURE2);
 
 
-    shaderList[0]->SetTexture(1);
-    shaderList[0]->SetDirectionalShadowMap(2);
+    shaderList[0].SetTexture(1);
+    shaderList[0].SetDirectionalShadowMap(2);
 
     glm::vec3 lowerLight = camera.getCameraPosition();
     lowerLight.y -= 0.3f;
     spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
-    shaderList[0]->Validate();
+    shaderList[0].Validate();
     RenderScene();
 }
 
@@ -333,9 +337,6 @@ int main()
     quadTexture = Texture("Textures/plain.png");
     quadTexture.LoadTextureA();
 
-    fighterTexture = Texture("Textures/SpaceShip.png");
-    fighterTexture.LoadTextureA();
-
     shinyMaterial = Material(0.3f, 1);
     dullMaterial = Material(0.3f, 1);
 
@@ -344,61 +345,40 @@ int main()
                                     0.1f, 0.1f,
                                     0.0f, -15.0f, -10.0f);
 
-    std::vector<glm::vec3> positions;
-
-
-    for(size_t i = 0; i <= 3; i++)
-    {
-        float angle = 360 / 3;
-        float xPos = sin(i * angle);
-        float zPos = cos(i * angle);
-        positions.push_back(glm::vec3(xPos * 5, 3, zPos * 5));
-    }
-
-    pointLights[0] = PointLight(    1024, 1024,
-                                    0.01f, 100.0f,
-                                    0.0f, 0.0f, 1.0f,
-                                    0.1f, 1.0f,
-                                    positions[0].x, positions[0].y, positions[0].z,
-                                    0.3f, 0.1f, 0.1f);
-
+    pointLights[0] = PointLight(1024, 1024,
+                                0.1f, 100.0f,
+                                0.0f, 0.0f, 1.0f,
+                                0.0f, 0.4f,
+                                2.0f, 2.0f, 0.0f,
+                                0.3f, 0.01f, 0.01f);
     pointLightCount++;
     
-    pointLights[1] = PointLight(    1024, 1024,
-                                    0.01f, 100.0f,
-                                    0.0f, 1.0f, 0.0f,
-                                    0.1f, 1.0f,
-                                    positions[1].x, positions[1].y, positions[1].z,
-                                    0.3f, 0.1f, 0.1f);
-
-    pointLightCount++;
-
-    pointLights[2] = PointLight(    1024, 1024,
-                                    0.01f, 100.0f,
-                                    1.0f, 0.0f, 0.0f,
-                                    0.1f, 1.0f,
-                                    positions[2].x, positions[2].y, positions[2].z,
-                                    0.3f, 0.1f, 0.1f);
+    pointLights[1] = PointLight(1024, 1024,
+                                0.1f, 100.0f,
+                                0.0f, 1.0f, 0.0f,
+                                0.0f, 0.4f,
+                                -2.0f, 2.0f, 0.0f,
+                                0.3f, 0.01f, 0.01f);
     pointLightCount++;
 
     spotLights[0] = SpotLight(  1024, 1024,
-                                0.01f, 100.0f,
+                                0.1f, 100.0f,
                                 1.0f, 1.0f, 1.0f,
-                                0.0f, 1.0f,
+                                0.0f, 2.0f,
                                 0.0f, 0.0f, 0.0f,
-                                0.0f,-1.0f, 0.0f,
+                                0.0f, -1.0f, 0.0f,
                                 1.0f, 0.0f, 0.0f,
-                                20.f);
-    spotLightCount++;    
+                                20.0f);
+    spotLightCount++;
 
     spotLights[1] = SpotLight(  1024, 1024,
-                                0.01f, 100.0f,
+                                0.1f, 100.0f,
                                 1.0f, 1.0f, 1.0f,
                                 0.0f, 1.0f,
-                                -0.0f, 0.0f, 0.0f,
-                                -1.0f, -1.0f, 0.0f,
+                                0.0f, -1.5f, 0.0f,
+                                -100.0f, -1.0f, 0.0f,
                                 1.0f, 0.0f, 0.0f,
-                                20.f);
+                                20.0f);
     spotLightCount++;
 
     GLfloat aspectRation = mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight();

@@ -10,7 +10,6 @@ public:
 	void RenderMesh();
 	void ClearMesh();
 
-
 	~Mesh();
 
 private:

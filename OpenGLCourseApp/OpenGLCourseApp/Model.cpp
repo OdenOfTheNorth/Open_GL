@@ -13,9 +13,10 @@ void Model::LoadModel(const std::string& fileName)
 
 	Assimp::Importer impoter;
 	const unsigned int aiProcceses = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices;
-	const aiScene* scene = impoter.ReadFile(fileName, aiProcceses);
+	const aiScene* scene = impoter.ReadFile(fileName, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
 	
-	if (!scene) {
+	if (!scene) 
+	{
 		printf("Model(%s) failed to load: %s", fileName, impoter.GetErrorString());
 		return;
 	}
@@ -84,7 +85,7 @@ void Model::LoadMesh(aiMesh* mesh, const aiScene* scene)
 		vertices.insert(vertices.end(), { mesh->mVertices[i].x, mesh->mVertices[i].y , mesh->mVertices[i].z });
 		if (mesh->mTextureCoords[0])
 		{
-			vertices.insert(vertices.end(), { -mesh->mTextureCoords[0][i].x, -mesh->mTextureCoords[0][i].y });
+			vertices.insert(vertices.end(), { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y });
 		}
 		else {
 			vertices.insert(vertices.end(), { 0.f, 0.f });
@@ -104,7 +105,6 @@ void Model::LoadMesh(aiMesh* mesh, const aiScene* scene)
 	}
 
 	Mesh* newMesh = new Mesh();
-
 	newMesh->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
 	meshList.push_back(newMesh);
 	meshToTex.push_back(mesh->mMaterialIndex);
