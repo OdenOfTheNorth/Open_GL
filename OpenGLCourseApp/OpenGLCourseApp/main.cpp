@@ -396,6 +396,14 @@ int main()
     skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_bk.tga");
     skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_ft.tga");
 
+    //std::vector<std::string> skyBoxFaces;
+    //skyBoxFaces.push_back("Textures/SkyBox/right.jpg");
+    //skyBoxFaces.push_back("Textures/SkyBox/left.jpg");
+    //skyBoxFaces.push_back("Textures/SkyBox/top.jpg");
+    //skyBoxFaces.push_back("Textures/SkyBox/bottom.jpg");
+    //skyBoxFaces.push_back("Textures/SkyBox/back.jpg");
+    //skyBoxFaces.push_back("Textures/SkyBox/front.jpg");
+
     skyBox = SkyBox(skyBoxFaces);
 
     GLfloat aspectRation = mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight();
@@ -417,7 +425,7 @@ int main()
         camera.keyControl(mainWindow.getKeys(), deltaTime);
         camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());     
 
-        camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3.0, 5.0), currentTime * 0.1);
+        //camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3.0, 5.0), currentTime * 0.1);
 
         DirectionalShadowMapPass(&mainLight);
         
