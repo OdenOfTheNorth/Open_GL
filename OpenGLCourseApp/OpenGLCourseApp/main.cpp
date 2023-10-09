@@ -27,6 +27,8 @@
 
 #include "Model.h"
 
+#include "SkyBox.h"
+
 const float toRadians = 3.14159265f / 180.f;
 
 GLuint  uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
@@ -55,6 +57,8 @@ std::vector<Model*> fighters;
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
 SpotLight spotLights[MAX_SPOT_LIGHTS];
+
+SkyBox skyBox;
 
 unsigned int pointLightCount = 0;
 unsigned int spotLightCount = 0;
@@ -155,10 +159,10 @@ void CreateObject()
 
     GLfloat floorVertices[] = {
         //   x        y      z          u        v         nX   nY   nZ
-            -100.f,  -0.f,  -100.0f,    0.0f,    0.0f,     0.f, -1.f, 0.f,
-             100.f,  -0.f,  -100.0f,    100.f,   0.0f,     0.f, -1.f, 0.f,
-            -100.f,  -0.f,   100.6f,    1.0f,    100.0f,    0.f, -1.f, 0.f,
-             100.0f,  0.f,   100.0f,    100.0f,  100.0f,    0.f, -1.f, 0.f
+            -10.f,   -0.f,  -10.0f,     0.0f,    0.0f,     0.f, -1.f, 0.f,
+             10.f,   -0.f,  -10.0f,     10.f,    0.0f,     0.f, -1.f, 0.f,
+            -10.f,   -0.f,   10.6f,     1.0f,    10.0f,    0.f, -1.f, 0.f,
+             10.0f,   0.f,   10.0f,     10.0f,   10.0f,    0.f, -1.f, 0.f
     };
 
     CalcAvarageNormals(indices, 12, vertices, 32, 8, 5);
@@ -220,6 +224,7 @@ void RenderScene()
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(3.0f, 1.0f, 3.0f));
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     dirtTexture.UseTexture();
     dullMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -277,6 +282,14 @@ void OmniShadowMapPass(PointLight* light)
 
 void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
+    glViewport(0, 0, 1920, 1080);
+
+    // Clear the window
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    skyBox.DrawSkybox(viewMatrix, projectionMatrix);
+
     shaderList[0].UseShader();
 
     uniformModel = shaderList[0].GetModelLocation();
@@ -285,12 +298,6 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
     uniformEyePosition = shaderList[0].GetEyePositionLocation();
     uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
     uniformShininess = shaderList[0].GetShininessLocation();
-
-    glViewport(0, 0, 1920, 1080);
-
-    // Clear the window
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
@@ -381,6 +388,16 @@ int main()
                                 20.0f);
     spotLightCount++;
 
+    std::vector<std::string> skyBoxFaces;
+    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_rt.tga");
+    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_lf.tga");
+    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_up.tga");
+    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_dn.tga");
+    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_bk.tga");
+    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_ft.tga");
+
+    skyBox = SkyBox(skyBoxFaces);
+
     GLfloat aspectRation = mainWindow.GetBufferWidth() / mainWindow.GetBufferHeight();
     glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRation, 0.1f, 100.f);
 
@@ -400,7 +417,7 @@ int main()
         camera.keyControl(mainWindow.getKeys(), deltaTime);
         camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());     
 
-        //camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), 6, currentTime);
+        camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3.0, 5.0), currentTime * 0.1);
 
         DirectionalShadowMapPass(&mainLight);
         

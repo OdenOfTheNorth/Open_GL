@@ -16,7 +16,7 @@ public:
 	void keyControl(bool* keys, GLfloat dealtaTime);
 	void mouseControl(GLfloat xChange, GLfloat yChange);
 
-	void RotateAroundPoint(glm::vec3 origin, float dist, float cTime);
+	void RotateAroundPoint(glm::vec3 origin, glm::vec3 offset, float cTime);
 
 	glm::vec3 getCameraPosition();
 	glm::vec3 getCameraDirection();
