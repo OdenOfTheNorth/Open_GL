@@ -207,10 +207,8 @@ void RenderScene()
 
     const float angle = 360 / fightersCount;
 
-    for (size_t i = 0; i < fightersCount; i++) {
-        
-        //currentTime +
-        //cos(currentTime + i)
+    for (size_t i = 0; i < fightersCount; i++) 
+    {        
         model = glm::mat4(1.0f);
         model = glm::rotate(model, currentTime + (angle * i * toRadians),glm::vec3(0.0, -1.0, 0));
         //model = glm::translate(model, glm::vec3(0, 2, 0));
@@ -388,21 +386,21 @@ int main()
                                 20.0f);
     spotLightCount++;
 
-    std::vector<std::string> skyBoxFaces;
-    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_rt.tga");
-    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_lf.tga");
-    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_up.tga");
-    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_dn.tga");
-    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_bk.tga");
-    skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_ft.tga");
-
     //std::vector<std::string> skyBoxFaces;
-    //skyBoxFaces.push_back("Textures/SkyBox/right.jpg");
-    //skyBoxFaces.push_back("Textures/SkyBox/left.jpg");
-    //skyBoxFaces.push_back("Textures/SkyBox/top.jpg");
-    //skyBoxFaces.push_back("Textures/SkyBox/bottom.jpg");
-    //skyBoxFaces.push_back("Textures/SkyBox/back.jpg");
-    //skyBoxFaces.push_back("Textures/SkyBox/front.jpg");
+    //skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_rt.tga");
+    //skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_lf.tga");
+    //skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_up.tga");
+    //skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_dn.tga");
+    //skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_bk.tga");
+    //skyBoxFaces.push_back("Textures/SkyBox/cupertin-lake_ft.tga");
+
+    std::vector<std::string> skyBoxFaces;
+    skyBoxFaces.push_back("Textures/SkyBox/right.jpg");
+    skyBoxFaces.push_back("Textures/SkyBox/left.jpg");
+    skyBoxFaces.push_back("Textures/SkyBox/top.jpg");
+    skyBoxFaces.push_back("Textures/SkyBox/bottom.jpg");
+    skyBoxFaces.push_back("Textures/SkyBox/front.jpg");
+    skyBoxFaces.push_back("Textures/SkyBox/back.jpg");
 
     skyBox = SkyBox(skyBoxFaces);
 
@@ -425,7 +423,7 @@ int main()
         camera.keyControl(mainWindow.getKeys(), deltaTime);
         camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());     
 
-        //camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3.0, 5.0), currentTime * 0.1);
+        camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3 + (sin(currentTime * 0.3) * 3), 5.0), currentTime * 0.1);
 
         DirectionalShadowMapPass(&mainLight);
         

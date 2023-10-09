@@ -1,1 +1,7 @@
-﻿  OpenGLCourseApp.vcxproj -> G:\GitHub\Open_GL_Course\OpenGLCourseApp\Debug\OpenGLCourseApp.exe
+﻿  main.cpp
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(15,36): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\Window.h(16,37): warning C4244: 'return': conversion from 'GLint' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\main.cpp(414,21): warning C4244: 'initializing': conversion from 'double' to 'GLfloat', possible loss of data
+G:\GitHub\Open_GL_Course\OpenGLCourseApp\OpenGLCourseApp\main.cpp(426,127): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  OpenGLCourseApp.vcxproj -> G:\GitHub\Open_GL_Course\OpenGLCourseApp\Debug\OpenGLCourseApp.exe
