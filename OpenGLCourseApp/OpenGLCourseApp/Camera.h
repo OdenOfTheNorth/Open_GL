@@ -34,6 +34,8 @@ private:
 	GLfloat pitch;
 
 	GLfloat moveSpeed;
+	GLfloat runSpeed;
+	GLfloat currentSpeed;
 	GLfloat turnSpeed;
 
 	void Update();

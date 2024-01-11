@@ -423,7 +423,7 @@ int main()
         camera.keyControl(mainWindow.getKeys(), deltaTime);
         camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());     
 
-        camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3 + (sin(currentTime * 0.3) * 3), 5.0), currentTime * 0.1);
+        //camera.RotateAroundPoint(glm::vec3(0.0, 2.0, 0.0), glm::vec3(5.0, 3 + (sin(currentTime * 0.3) * 3), 5.0), currentTime * 0.1);
 
         DirectionalShadowMapPass(&mainLight);
         
